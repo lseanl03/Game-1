@@ -16,8 +16,15 @@ public class PlatformSwitch : Interactable
 
     public void CheckInteract()
     {
-        Debug.Log("turn on" +turnOn);
-        turnOn = !turnOn;
+        Debug.Log("turn on " + turnOn);
+        if (turnOn)
+        {
+            return;
+        }
+        else
+        {
+            turnOn =true;
+        }
         SpriteRenderer[] sprite = GetComponentsInChildren<SpriteRenderer>();
         for (int i = 0; i < sprite.Length; i++)
         {

@@ -20,7 +20,7 @@ public class PlayerBulletController : MonoBehaviour
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.CompareTag("Enemy") && collision.GetComponent<EnemyHealth>())
+        if (collision.CompareTag("Enemy") || collision.GetComponent<EnemyHealth>())
         {
             collision.GetComponent<EnemyHealth>().EnemyTakeDamage(damage);
         }

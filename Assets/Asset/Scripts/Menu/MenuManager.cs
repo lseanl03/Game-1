@@ -23,7 +23,7 @@ public class MenuManager : MonoBehaviour
     public void StartGame()
     {
         FindObjectOfType<AudioManager>().PlaySFX("OnClick");
-        SceneManager.LoadScene("Start1");
+        SceneManager.LoadScene("Start 1");
     }
     public void Options()
     {

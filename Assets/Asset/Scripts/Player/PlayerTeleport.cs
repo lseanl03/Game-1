@@ -131,6 +131,7 @@ public class PlayerTeleport : MonoBehaviour
         isGround = false;
         cameraController.followPlayer = true;
         DestroyParticleObj();
+        DestroyEffect();
     }
     public void CheckInGround()
     {
@@ -143,18 +144,31 @@ public class PlayerTeleport : MonoBehaviour
     {
         teleportLimitCircleObj = Instantiate(teleportLimitCircle, transform.position, teleportLimitCircle.transform.rotation);
         teleportingTargetObj = Instantiate(teleportTargetSelect, transform.position, teleportTargetSelect.transform.rotation);
+        if (teleportingTargetObj != null || teleportLimitCircleObj != null)
+        {
+            SetParent(teleportLimitCircleObj);
+            SetParent(teleportingTargetObj);
+        }
     }
     public void DestroyParticleObj()
     {
         Destroy(teleportingTargetObj);
         Destroy(teleportLimitCircleObj);
     }
+    void DestroyEffect()
+    {
+        Destroy(effect1, 1f);
+        Destroy(effect2, 1f);
+    }
     public void SpawnEffectObj()
     {
         effect1 = Instantiate(teleportEffect1, teleportLimitCircleObj.transform.position, teleportEffect1.transform.rotation);
         effect2 = Instantiate(teleportEffect2, teleportingTargetObj.transform.position, teleportEffect2.transform.rotation);
-        Destroy(effect1,1f);
-        Destroy(effect2,1f);
+        if (effect1 != null || effect2 != null)
+        {
+            SetParent(effect1);
+            SetParent(effect2);
+        }
     }
     public void GravityChange()
     {
@@ -187,6 +201,18 @@ public class PlayerTeleport : MonoBehaviour
             GravityChange();
             DestroyParticleObj();
             rb2d.gravityScale = rb2d.gravityScale +0.001f;
+        }
+    }
+    void SetParent(GameObject obj)
+    {
+        GameObject objSpawn = GameObject.Find("SpawnParticleEffects");
+        if(objSpawn != null)
+        {
+            obj.transform.parent = objSpawn.transform;
+        }
+        else
+        {
+            Debug.Log("a");
         }
     }
 }

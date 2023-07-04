@@ -7,6 +7,7 @@ public class EnergyParticleManager : MonoBehaviour
     public float speed = 20;
 
     public GameObject energyParticlePrefab;
+    public GameObject newEnergyParticle;
     public List<GameObject> energyParticles;
     public Vector3 newVector = new Vector3(0, 2f, 0f);
 
@@ -16,12 +17,15 @@ public class EnergyParticleManager : MonoBehaviour
     }
     private void Update()
     {
-        MoveEnergyParticles();
+        if(newEnergyParticle != null)
+        {
+            MoveEnergyParticles();
+        }
     }
     public void SpawnEnergyParticle(GameObject obj)
     {
-        GameObject newEnergyParticle = Instantiate(energyParticlePrefab, obj.transform.position + newVector, Quaternion.identity);
-        energyParticles.Add(newEnergyParticle);
+            newEnergyParticle = Instantiate(energyParticlePrefab, obj.transform.position + newVector, Quaternion.identity);
+            energyParticles.Add(newEnergyParticle);
     }
 
     public void MoveEnergyParticles()

@@ -2,45 +2,82 @@
 using UnityEngine;
 
 public enum MoveType{
+    Idle,
+    Patrol,
     Run,
-    Teleport 
+    Teleport,
 }
 public class EnemyController2 : MonoBehaviour
 {
-    public MoveType moveType;
+    [SerializeField] private MoveType moveType;
+    [SerializeField] private Transform[] points;
+    [SerializeField] private GameObject wayPointObj;
 
+    [SerializeField] private GameObject teleportTarget;
+    private GameObject teleportTargetObj;
     private Rigidbody2D rb2d;
-    public Transform[] points;
+    private Animator animator;
 
-    public GameObject teleportTargetObj;
-    public GameObject teleportTargetSelect;
 
     public int currentPoint = 0;
-    public float speed = 5f;
+    public float speed = 10;
+    public float countdown=2;
 
     public bool canSpawn = true;
     public bool isFacingRight = true;
+    public bool isDied = false;
+
 
     private void Start()
     {
+        transform.position = points[0].position;
         rb2d = GetComponent<Rigidbody2D>();
-        moveType = MoveType.Run;
+        animator = GetComponent<Animator>();
     }
     private void Update()
     {
-        ChangeActive();
-        Flip();
+        CheckDied();
+        if (!isDied)
+        {
+            ChangeActive();
+            ChangeAnimation();
+            ChangeMoveType();
+        }
+    }
+    void ChangeAnimation()
+    {
+        if (rb2d.velocity == Vector2.zero || speed == 0)
+        {
+            animator.SetBool("isRun", false);
+        }
+        else
+        {
+            animator.SetBool("isRun", true);
+        }
+    }
+    void ChangeMoveType()
+    {
         switch (moveType)
         {
+            case MoveType.Idle:
+                break;
+            case MoveType.Patrol:
+                break;
+
             case MoveType.Run:
                 Move();
                 break;
             case MoveType.Teleport:
-                SpawnTarget();
-                TargetMove();
-                TeleportActive();
+                if(teleportTargetObj == null)
+                {
+                    SpawnTarget();
+                }
+                else
+                {
+                    TargetMove();
+                    TeleportActive();
+                }
                 break;
-
         }
     }
     void Move()
@@ -63,18 +100,29 @@ public class EnemyController2 : MonoBehaviour
         if (Vector2.Distance(gameObject.transform.position, points[currentPoint].position) > 0.1f)
         {
             ChangeMoveType(MoveType.Run);
-            Debug.Log("MoveType: " + moveType.ToString());
         }
         else
         {
-            if (transform.position.x == points[points.Length - 1].position.x)
+            if(currentPoint == 0 || currentPoint==points.Length-1)
             {
-                isFacingRight = false;
-                currentPoint--;
-                ChangeMoveType(MoveType.Run);
+                countdown -= Time.deltaTime;
+
+                if (countdown <= 0)
+                {
+                    Flip();
+                    currentPoint += isFacingRight ? 1 : -1;
+                    countdown= 2;
+                    speed = 10;
+                }
+                else if(countdown<2)
+                {
+                    speed = 0;
+                }
             }
-            ChangeMoveType(MoveType.Teleport);
-            Debug.Log("MoveType: " + moveType.ToString());
+            else
+            {
+                ChangeMoveType(MoveType.Teleport);
+            }
         }
     }
     void SpawnTarget()
@@ -82,7 +130,7 @@ public class EnemyController2 : MonoBehaviour
         if (canSpawn)
         {
             teleportTargetObj =
-            Instantiate(teleportTargetSelect, transform.position, teleportTargetSelect.transform.rotation);
+            Instantiate(teleportTarget, transform.position, teleportTarget.transform.rotation);
             canSpawn = false;
         }
     }
@@ -104,10 +152,16 @@ public class EnemyController2 : MonoBehaviour
     }
     void TeleportActive()
     {
-        if (Vector2.Distance(teleportTargetObj.transform.position, points[currentPoint + 1].transform.position) < 0.1f)
+        if (isFacingRight && Vector2.Distance(teleportTargetObj.transform.position, points[currentPoint + 1].transform.position) < 0.1f)
         {
             gameObject.transform.position = teleportTargetObj.transform.position;
             currentPoint = currentPoint + 1;
+            DestroyTarget();
+        }
+        else if(!isFacingRight && Vector2.Distance(teleportTargetObj.transform.position, points[currentPoint - 1].transform.position) < 0.1f)
+        {
+            gameObject.transform.position = teleportTargetObj.transform.position;
+            currentPoint = currentPoint - 1;
             DestroyTarget();
         }
         else
@@ -140,15 +194,18 @@ public class EnemyController2 : MonoBehaviour
     }
     void Flip()
     {
-        //if (Vector2.Distance(gameObject.transform.position, points[points.Length-1].transform.position) < 0.1f)
-        //{
-        //    isFacingRight = false;
-        //    currentPoint--;
-        //}
-        //else if (Vector2.Distance(gameObject.transform.position, points[0].transform.position) < 0.1f)
-        //{
-        //    isFacingRight = true;
-        //    currentPoint++;
-        //}
+        isFacingRight = !isFacingRight;
+        Vector3 newScale = transform.localScale;
+        newScale.x *= -1f;
+        transform.localScale = newScale;
+    }
+    void CheckDied()
+    {
+        EnemyHealth enemyHealth=GetComponent<EnemyHealth>();
+        if(enemyHealth.currentHealth<=0)
+        {
+            isDied = true;
+            DestroyTarget();
+        }
     }
 }

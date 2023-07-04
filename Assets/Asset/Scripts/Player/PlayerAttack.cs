@@ -5,28 +5,33 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
+    public float timeBetweenAttack=0f;
+    public float attackTime=1f;
+    public float bulletSpeed = 80f;
+
     public Animator animator;
-    public BulletSpawn bulletSpawn;
-    public float attackCountdown=1f;
+    public GameObject bullet;
+    public Transform firePoint;
+    public PlayerController playerController;
+    public PlayerInteract playerInteract;
     private void Start()
     {
         animator=GetComponent<Animator>();
+        playerController = GetComponent<PlayerController>();
+        playerInteract=GetComponent<PlayerInteract>();
     }
     private void Update()
     {
-        attackCountdown += Time.deltaTime;
-        if (Input.GetMouseButtonDown(0) && attackCountdown>=1f && Time.timeScale != 0f)
+        timeBetweenAttack += Time.deltaTime;
+        if (Input.GetMouseButtonDown(0) && timeBetweenAttack >= attackTime 
+            && Time.timeScale == 1 && !playerInteract.interacting)
         {
             Attack();
-            attackCountdown=0;
+            timeBetweenAttack = 0f;
         }
-        else
+        if (timeBetweenAttack >= 5f)
         {
-            return;
-        }
-        if (attackCountdown >= 5f)
-        {
-            attackCountdown = 1f;
+            timeBetweenAttack = 1f;
         }
     }
     void Attack()
@@ -37,7 +42,18 @@ public class PlayerAttack : MonoBehaviour
     }
     void Shoot()
     {
-        bulletSpawn.Bullet();
+        GameObject bulletPrefab = Instantiate(bullet, firePoint.position, Quaternion.identity);
+        Rigidbody2D bulletRb = bulletPrefab.GetComponent<Rigidbody2D>();
+        if (playerController.isFacingRight)
+        {
+            bulletRb.velocity = new Vector2(bulletSpeed, 0f);
+        }
+        else
+        {
+            bulletRb.velocity = new Vector2(-bulletSpeed, 0f);
+        }
+
     }
+
 
 }

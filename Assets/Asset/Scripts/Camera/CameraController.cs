@@ -6,11 +6,13 @@ public class CameraController : MonoBehaviour
     public Camera cam;
     public bool followPlayer = true;
     public float zoom = 5f;
+    public float speed = 0.1f;
+    public float directionY = 10f;
     private void Start()
     {
         cam = GetComponent<Camera>();
     }
-    void Update()
+    void FixedUpdate()
     {
         Zoom();
         FollowPlayer();
@@ -30,8 +32,12 @@ public class CameraController : MonoBehaviour
     {
         if (followPlayer)
         {
-            transform.position = new Vector3(player.position.x, player.position.y + 6, transform.position.z);
+            if (player != null)
+            {
+                Vector3 newPosition = new Vector3(player.position.x, player.position.y + directionY, transform.position.z);
+                transform.position = Vector3.Lerp(transform.position, newPosition, Time.fixedDeltaTime * speed);
+            }
         }
-
     }
+
 }

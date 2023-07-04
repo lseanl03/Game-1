@@ -6,26 +6,39 @@ using UnityEngine.UI;
 public class EnemyHeathBar : MonoBehaviour
 {
     public Slider slider;
-    private void Start()
+    public float targetProgress = 0f;
+    private void Awake()
     {
         slider = GetComponent<Slider>();
         gameObject.SetActive(false);
+    }
+    private void Start()
+    {
+    }
+    private void FixedUpdate()
+    {
+
+    }
+    private void Update()
+    {
+        if (gameObject.activeSelf)
+        {
+            if(slider.value > targetProgress)
+            {
+                float fillSpeed = targetProgress + slider.maxValue;
+                slider.value -= fillSpeed * Time.deltaTime;
+            }
+        }
     }
     public void SetHealth(int health)
     {
         if (health < slider.maxValue)
             gameObject.SetActive(true);
-        slider.value = health;
-        if (health <= 0)
-            Invoke("Destroy", 0.5f);
+        targetProgress = health;
     }
     public void SetMaxHealth(int health)
     {
         slider.maxValue = health;
         slider.value = health;
-    }
-    void Destroy()
-    {
-        Destroy(gameObject);
     }
 }

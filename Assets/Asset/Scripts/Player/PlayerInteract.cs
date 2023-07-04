@@ -4,20 +4,21 @@ using UnityEngine;
 
 public class PlayerInteract : MonoBehaviour
 {
+    public bool canInteract;
+    public bool interacting = false;
+    public float radius =5f;
     public GameObject interactButton;
-
-    public float radius;
     private void Start()
     {
-        radius = 5f;
-        HideButton();
+
     }
     private void Update()
     {
-        CheckButton();
-        if (Input.GetKeyDown(KeyCode.F))
+        CheckInteractableObj();
+        if (Input.GetKeyDown(KeyCode.F) && canInteract)
         {
-            CheckInteraction();    
+            Interaction();
+            FindObjectOfType<AudioManager>().PlaySFX("Interact");
         }
     }
      public void ShowButton()
@@ -28,7 +29,7 @@ public class PlayerInteract : MonoBehaviour
     {
         interactButton.SetActive(false);
     }
-    public void CheckInteraction()
+    public void Interaction()
     {
         Collider2D[] collider2d = Physics2D.OverlapCircleAll(transform.position, radius);
         foreach (Collider2D collider in collider2d)
@@ -42,25 +43,51 @@ public class PlayerInteract : MonoBehaviour
                 }
                 return;
             }
+            if (collider.transform.GetComponent<NPC>())
+            {
+                interacting = true;
+                collider.transform.GetComponent<NPC>().Dialogue();
+            }
         }
     }
-    public void CheckButton()
+    public void CheckInteractableObj()
     {
-        bool hasInteractable = false;
+        canInteract = false;
         Collider2D[] collider2d = Physics2D.OverlapCircleAll(transform.position, radius);
         foreach (Collider2D collider in collider2d)
         {
             if (collider.transform.GetComponent<Interactable>())
             {
-                hasInteractable = true;
-                ShowButton();
-                interactButton.transform.position = collider.transform.position + new Vector3(0, 1f, 0f);
+                Vector3 newVector = new Vector3(0, 5f, 0f);
+                Active();
+                interactButton.transform.position = collider.transform.position + newVector;
+            }
+
+            if (collider.transform.GetComponent<NPC>())
+            {
+                Vector3 newVector = new Vector3(0, 6f, 0f);
+                Active();
+                interactButton.transform.position = collider.transform.position + newVector;
+                if (!collider.transform.GetComponent<NPC>().talking)
+                {
+                    if (interacting)
+                    {
+                        interacting = false;
+                        return;
+                    }
+                }
             }
         }
-        if (!hasInteractable)
+        if (!canInteract)
         {
             HideButton();
+            return;
         }
+    }
+    void Active()
+    {
+        canInteract = true;
+        ShowButton();
     }
     public void OnDrawGizmos()
     {
@@ -76,6 +103,7 @@ public class PlayerInteract : MonoBehaviour
             {
                 platform.GetComponent<MovingPlatform>().unlocked = true;
                 Debug.Log(platform.GetComponent<MovingPlatform>().unlocked +" set unlock");
+                Debug.Log(" set unlock");
             }
         }
     }

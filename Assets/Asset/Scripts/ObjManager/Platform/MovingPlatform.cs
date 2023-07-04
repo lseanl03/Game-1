@@ -14,9 +14,10 @@ public class MovingPlatform : MonoBehaviour
     public bool shutDown =false;
     public bool movedToPoint =false;
     public bool onCollisionExit =false;
+    public bool canTurnOn =false;
 
     public Vector2 defaultLocation;
-    public enum UseCase {  Auto, Manual, Remote}
+    public enum UseCase { Auto, Manual, Remote }
     public UseCase useCase;
 
     public Transform[] points;
@@ -82,13 +83,20 @@ public class MovingPlatform : MonoBehaviour
         }
         if (!unlocked)
         {
-            PlatformSwitch[] switches = FindObjectsOfType<PlatformSwitch>();
-            foreach (PlatformSwitch switchObj in switches)
+            if(canTurnOn)
             {
-                if (switchObj.turnOn)
+                PlatformSwitch[] switches = FindObjectsOfType<PlatformSwitch>();
+                foreach (PlatformSwitch switchObj in switches)
                 {
-                    switchObj.transform.GetComponent<Interactable>().Interact();
-                    Debug.Log("Interact");
+                    if (switchObj.turnOn)
+                    {
+                        switchObj.transform.GetComponent<Interactable>().Interact();
+                        Debug.Log("Interact");
+                    }
+                    else
+                    {
+                        canTurnOn = false;
+                    }
                 }
             }
         }
@@ -199,6 +207,7 @@ public class MovingPlatform : MonoBehaviour
         {
             Debug.Log("set unlock = false");
             unlocked = false;
+            canTurnOn = true;
             onCollisionExit = false;
         }
     }

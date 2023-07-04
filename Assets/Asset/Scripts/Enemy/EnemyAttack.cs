@@ -4,31 +4,33 @@ using UnityEngine;
 
 public class EnemyAttack : MonoBehaviour
 {
-    public bool canShoot = true;
+
     public bool targetDetection = false;
-    public GameObject enemyBullet;
-    public float bulletSpeed=50f;
-    public float fireCooldown=1f;
-    private Animator animator;
-    private EnemyController enemyController;
-    public Transform firePoint;
-    public PlayerHealth playerHealth;
+    public float bulletSpeed = 50f;
+    public float fireCooldown = 1f;
+
     private Vector2 raycastDirection= Vector2.right;
+
+    private Animator animator;
+    public GameObject enemyBullet;
+    public Transform firePoint;
+    public EnemyController2 enemyController;
+    private EnemyHealth enemyHealth;
+    public PlayerHealth playerHealth;
     private void Start()
     {
         animator = GetComponent<Animator>();
-        enemyController = GetComponent<EnemyController>();
+        enemyHealth = GetComponent<EnemyHealth>();
+        enemyController = GetComponent<EnemyController2>();
+        
+        playerHealth=GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>();
     }
     private void Update()
     {
-        if (canShoot && Time.timeScale != 0f)
-        {
+        if (!playerHealth.isDead && !enemyHealth.isDied && Time.timeScale == 1)
+        {   
             fireCooldown -= Time.deltaTime;
             CheckPlayer();
-        }
-        if (playerHealth.currentHealth <= 0)
-        {
-            canShoot = false;
         }
     }
     void Shoot()
@@ -62,8 +64,8 @@ public class EnemyAttack : MonoBehaviour
             {
                 raycastDirection = Vector2.left;
             }
-            RaycastHit2D hit2D = Physics2D.Raycast(transform.position + new Vector3(0.6f, 2, 0), Vector2.right, 50f);
-            Debug.DrawRay(transform.position + new Vector3(0.6f, 2, 0), Vector2.right * 50f, Color.red);
+            RaycastHit2D hit2D = Physics2D.Raycast(transform.position + new Vector3(0.6f, 2, 0), Vector2.right, 20f);
+            Debug.DrawRay(transform.position + new Vector3(0.6f, 2, 0), Vector2.right * 20f, Color.red);
             if (hit2D.collider != null && hit2D.collider.CompareTag("Player"))
             {
                 targetDetection=true;

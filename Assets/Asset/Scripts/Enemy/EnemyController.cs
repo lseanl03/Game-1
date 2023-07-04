@@ -7,45 +7,36 @@ public class EnemyController : MonoBehaviour
 {
     private int currentPoint = 1;
     public float enemyMove;
-    public bool isFacingRight = true;
-    private bool canMove=true;
-    private bool canFlip = true;
     public float waitTime = 0f;
     public float moveSpeed = 10f;
     private float pointPos;
     private float currentPos;
 
+    public bool isFacingRight = true;
+    private bool canMove = true;
+    private bool canFlip = true;
+    public bool isDied = false;
 
     private Rigidbody2D rb2d;
-    private CapsuleCollider2D capsuleCollider;
     private Animator animator;
-    public EnemyHealth enemyHealth;
-    public GameObject fire;
 
-    [SerializeField] private GameObject[] point;
+    [SerializeField] private Transform[] points;
 
     private void Start()
     {
         rb2d = GetComponent<Rigidbody2D>();
-        capsuleCollider = GetComponent<CapsuleCollider2D>();
         animator = GetComponent<Animator>();
     }
     private void Update()
     {
-        if (canMove && Time.timeScale != 0f)
+        CheckDied();
+        if (!isDied && canMove && Time.timeScale == 1)
         {
-            pointPos = point[currentPoint].transform.position.x;
+            pointPos = points[currentPoint].transform.position.x;
             currentPos = transform.position.x;
             enemyMove = Mathf.Abs(pointPos - currentPos);
             Move();
             CheckGround();
-
-        }
-        if (enemyHealth.currentHealth <= 0)
-        {
-            moveSpeed = 0f;
-            canFlip = false;
-            Destroy(fire.gameObject);
         }
     }
     void Move()
@@ -54,7 +45,6 @@ public class EnemyController : MonoBehaviour
         {
             
             rb2d.velocity = new Vector2(moveSpeed, 0);
-            enemyMove = Mathf.Abs(pointPos - currentPos);
             animator.SetBool("isRun", true);
             if (enemyMove < 0.5f)
             {
@@ -72,8 +62,7 @@ public class EnemyController : MonoBehaviour
             }
         }
         else
-        {
-            
+        {           
             rb2d.velocity = new Vector2(-moveSpeed, 0);
             enemyMove = Mathf.Abs(pointPos - currentPos);
             animator.SetBool("isRun", true);
@@ -114,6 +103,14 @@ public class EnemyController : MonoBehaviour
         else
         {
             canMove = false;
+        }
+    }
+    void CheckDied()
+    {
+        EnemyHealth enemyHealth = GetComponent<EnemyHealth>();
+        if (enemyHealth.currentHealth <= 0)
+        {
+            isDied = true;
         }
     }
 }

@@ -1,25 +1,29 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+
 public class FollowTarget : MonoBehaviour
 {
-
-    [SerializeField] protected Transform target;
-    [SerializeField] protected float speed = 2f;
-
-    protected virtual void FixedUpdate()
+    public bool flipped = false;
+    private void Start()
     {
-        this.Following();
     }
 
-    protected virtual void Following()
+    private void Update()
     {
-        if (this.target == null) return;
-        transform.position = Vector3.Lerp(transform.position, this.target.position, Time.fixedDeltaTime * this.speed);
-    }
-
-    public virtual void SetTarget(Transform target)
-    {
-        this.target = target;
+        if (transform.localScale.x != transform.parent.parent.localScale.x)
+        {
+            if(!flipped)
+            {
+                Vector3 newLocal = transform.localScale;
+                newLocal.x = transform.parent.parent.localScale.x;
+                transform.localScale = newLocal;
+                flipped = true;
+            }
+        }
+        else
+        {
+            flipped = false; 
+        }
     }
 }
